@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Tradutor Voz → Libras</title>
+
+<style>
+
+body{
+background: linear-gradient(135deg,#5b4d9d,#7aa8ff);
+color:white;
+font-family:Arial;
+display:flex;
+flex-direction:column;
+align-items:center;
+justify-content:center;
+height:100vh;
+margin:0;
+text-align:center;
+}
+
+h1{
+font-weight:300;
+letter-spacing:2px;
+}
+
+button{
+margin-top:30px;
+padding:16px 40px;
+font-size:20px;
+border:none;
+border-radius:12px;
+background:linear-gradient(135deg,#c6b7ff,#9fd2ff);
+color:#2b2b2b;
+font-weight:bold;
+cursor:pointer;
+}
+
+/* legenda escondida */
+#legenda{
+opacity:0;
+position:absolute;
+pointer-events:none;
+}
+
+</style>
+</head>
+
+<body>
+
+<h1>🎤 Voz para Libras</h1>
+
+<p>Fale normalmente. O avatar irá traduzir.</p>
+
+<button id="start">Iniciar Microfone</button>
+
+<!-- texto oculto -->
+<div id="legenda"></div>
+
+<!-- VLibras container -->
+<div vw class="enabled">
+<div vw-access-button class="active"></div>
+<div vw-plugin-wrapper>
+<div class="vw-plugin-top-wrapper"></div>
+</div>
+</div>
+
+<script src="https://vlibras.gov.br/app/vlibras-plugin.js"></script>
+
+<script>
+
+new window.VLibras.Widget('https://vlibras.gov.br/app');
+
+const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+if(!SpeechRecognition){
+alert("Seu navegador não suporta reconhecimento de voz.");
+}
+
+const recognition = new SpeechRecognition();
+
+recognition.lang = "pt-BR";
+recognition.continuous = true;
+recognition.interimResults = true;
+
+let textoFinal = "";
+
+document.getElementById("start").onclick = () => {
+recognition.start();
+}
+
+recognition.onresult = (event) => {
+
+let textoTemp = "";
+
+for(let i = event.resultIndex; i < event.results.length; i++){
+
+let transcript = event.results[i][0].transcript;
+
+if(event.results[i].isFinal){
+textoFinal += transcript + " ";
+}else{
+textoTemp += transcript;
+}
+
+}
+
+let texto = textoFinal + textoTemp;
+
+document.getElementById("legenda").innerText = texto;
+
+/* força atualização do VLibras */
+setTimeout(()=>{
+document.getElementById("legenda").innerText = texto;
+},100);
+
+}
+
+recognition.onend = ()=>{
+recognition.start();
+}
+
+</script>
+
+</body>
+</html>
