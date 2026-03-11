@@ -6,9 +6,9 @@
 
 <style>
 body{
-font-family: Arial;
 background:#111;
 color:white;
+font-family:Arial;
 display:flex;
 flex-direction:column;
 align-items:center;
@@ -30,7 +30,6 @@ button{
 margin-top:30px;
 padding:15px 40px;
 font-size:20px;
-cursor:pointer;
 }
 </style>
 </head>
@@ -39,7 +38,7 @@ cursor:pointer;
 
 <h1>🎤 Legenda por Voz</h1>
 
-<div id="legenda">Clique em iniciar e fale...</div>
+<div id="legenda">Clique em iniciar...</div>
 
 <button id="start">Iniciar</button>
 
@@ -47,8 +46,8 @@ cursor:pointer;
 
 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
-if (!SpeechRecognition) {
-document.getElementById("legenda").innerText = "Seu navegador não suporta reconhecimento de voz.";
+if(!SpeechRecognition){
+alert("Seu navegador não suporta reconhecimento de voz.");
 }
 
 const recognition = new SpeechRecognition();
@@ -57,24 +56,34 @@ recognition.lang = "pt-BR";
 recognition.continuous = true;
 recognition.interimResults = true;
 
+let textoFinal = "";
+
 document.getElementById("start").onclick = () => {
 recognition.start();
 }
 
 recognition.onresult = (event) => {
 
-let texto = "";
+let textoTemp = "";
 
-for (let i = event.resultIndex; i < event.results.length; i++) {
-texto += event.results[i][0].transcript;
+for(let i = event.resultIndex; i < event.results.length; i++){
+
+let transcript = event.results[i][0].transcript;
+
+if(event.results[i].isFinal){
+textoFinal += transcript + " ";
+}else{
+textoTemp += transcript;
 }
 
-document.getElementById("legenda").innerText = texto;
+}
+
+document.getElementById("legenda").innerText = textoFinal + textoTemp;
 
 }
 
-recognition.onerror = (event)=>{
-console.log(event.error);
+recognition.onend = ()=>{
+recognition.start();
 }
 
 </script>
