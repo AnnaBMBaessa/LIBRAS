@@ -6,125 +6,115 @@
 
 <style>
 body{
-background: linear-gradient(135deg,#5b4d9d,#7aa8ff);
-color:white;
-font-family:Arial;
-display:flex;
-flex-direction:column;
-align-items:center;
-justify-content:center;
-height:100vh;
-margin:0;
-text-align:center;
+  background: linear-gradient(135deg,#5b4d9d,#7aa8ff);
+  color:white;
+  font-family:Arial;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  height:100vh;
+  margin:0;
+  text-align:center;
 }
 
 h1{
-font-weight:300;
-letter-spacing:2px;
+  font-weight:300;
+  letter-spacing:2px;
 }
 
 button{
-margin-top:30px;
-padding:16px 40px;
-font-size:20px;
-border:none;
-border-radius:12px;
-background:linear-gradient(135deg,#c6b7ff,#9fd2ff);
-color:#2b2b2b;
-font-weight:bold;
-cursor:pointer;
+  margin-top:30px;
+  padding:16px 40px;
+  font-size:20px;
+  border:none;
+  border-radius:12px;
+  background:linear-gradient(135deg,#c6b7ff,#9fd2ff);
+  color:#2b2b2b;
+  font-weight:bold;
+  cursor:pointer;
 }
 
 #legenda{
-position:fixed;
-bottom:40px;
-left:50%;
-transform:translateX(-50%);
-background:rgba(0,0,0,0.7);
-padding:12px 24px;
-border-radius:12px;
-font-size:22px;
-max-width:80%;
-min-height:30px;
-text-align:center;
+  position:fixed;
+  bottom:40px;
+  left:50%;
+  transform:translateX(-50%);
+  background:rgba(0,0,0,0.7);
+  padding:12px 24px;
+  border-radius:12px;
+  font-size:22px;
+  max-width:80%;
+  min-height:30px;
+  text-align:center;
 }
-
 </style>
 </head>
 
 <body>
 
 <h1>🎤 Voz para Libras</h1>
-
 <p>Fale normalmente. O avatar irá traduzir.</p>
-
 <button id="start">Iniciar Microfone</button>
-
 <div id="legenda"></div>
 
+<!-- VLibras -->
 <div vw class="enabled">
-<div vw-access-button class="active"></div>
-<div vw-plugin-wrapper>
-<div class="vw-plugin-top-wrapper"></div>
-</div>
+  <div vw-access-button class="active"></div>
+  <div vw-plugin-wrapper>
+    <div class="vw-plugin-top-wrapper"></div>
+  </div>
 </div>
 
 <script src="https://vlibras.gov.br/app/vlibras-plugin.js"></script>
 
 <script>
-
 new window.VLibras.Widget('https://vlibras.gov.br/app');
 
 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
 if(!SpeechRecognition){
-alert("Seu navegador não suporta reconhecimento de voz.");
+  alert("Seu navegador não suporta reconhecimento de voz.");
 }
 
 const recognition = new SpeechRecognition();
-
 recognition.lang = "pt-BR";
 recognition.continuous = true;
 recognition.interimResults = true;
 
+let filaPalavras = [];
+const tempoEntrePalavras = 3000; // 3 segundos
+const legendaDiv = document.getElementById("legenda");
+
 document.getElementById("start").onclick = () => {
-recognition.start();
-document.getElementById("start").innerText = "🎙️ Ouvindo...";
+  recognition.start();
+  document.getElementById("start").innerText = "🎙️ Ouvindo...";
 }
 
-// função para mostrar a legenda e sumir depois
-function mostrarPalavra(palavra, tempo=3000){
-    const legendaDiv = document.getElementById("legenda");
-    legendaDiv.innerText = palavra;
-    setTimeout(()=>{
-        // só limpa se a palavra ainda estiver visível
-        if(legendaDiv.innerText === palavra){
-            legendaDiv.innerText = "";
-        }
-    }, tempo);
+// função que processa a fila de palavras e mostra no VLibras
+function processarFila(){
+    if(filaPalavras.length > 0){
+        const palavra = filaPalavras.shift();
+        legendaDiv.innerText = palavra; // VLibras lê automaticamente
+        setTimeout(processarFila, tempoEntrePalavras);
+    } else {
+        legendaDiv.innerText = ""; // limpa quando a fila acabar
+    }
 }
 
 recognition.onresult = (event) => {
     for(let i = event.resultIndex; i < event.results.length; i++){
         let transcript = event.results[i][0].transcript.trim();
         if(event.results[i].isFinal){
-            // quebra em palavras
+            // adiciona palavras à fila
             let palavras = transcript.split(" ");
-            palavras.forEach((palavra, index)=>{
-                // cada palavra aparece com um pequeno delay entre elas
-                setTimeout(()=>{
-                    mostrarPalavra(palavra, 3000);
-                }, index * 400); // 400ms entre palavras
-            });
+            filaPalavras.push(...palavras);
+            // se a fila estava vazia antes, inicia o processamento
+            if(filaPalavras.length === palavras.length){
+                processarFila();
+            }
         }
     }
-
-    // força atualização VLibras
-    let texto = "";
-    for(let i = event.resultIndex; i < event.results.length; i++){
-        texto += event.results[i][0].transcript + " ";
-    }
-    setTimeout(()=>{document.getElementById("legenda").innerText = texto},100);
 }
 
 recognition.onend = ()=>{
@@ -140,7 +130,6 @@ recognition.onerror = (event) => {
         console.log("Nenhuma fala detectada");
     }
 }
-
 </script>
 
 </body>
