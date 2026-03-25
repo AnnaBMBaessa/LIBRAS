@@ -109,9 +109,8 @@ textoTemp += transcript;
 }
 
 }
-// evita texto infinito
-if(textoFinal.length > 200){
-textoFinal = "";
+if(textoFinal.length > 300){
+textoFinal = textoFinal.slice(-150);
 }
 let texto = textoFinal + textoTemp;
 
@@ -127,7 +126,17 @@ document.getElementById("legenda").innerText = texto;
 recognition.onend = ()=>{
 recognition.start();
 }
+recognition.onerror = (event) => {
+console.error("Erro:", event.error);
 
+if(event.error === "not-allowed"){
+alert("Permissão do microfone negada!");
+}
+
+if(event.error === "no-speech"){
+console.log("Nenhuma fala detectada");
+}
+}
 </script>
 
 </body>
