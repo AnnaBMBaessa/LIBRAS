@@ -83,21 +83,24 @@ recognition.continuous = true;
 recognition.interimResults = true;
 
 let filaPalavras = [];
-const tempoEntrePalavras = 3000; // 3 segundos
+const tempoEntrePalavras = 3500; // cada palavra aparece por 3,5 segundos
 const legendaDiv = document.getElementById("legenda");
+let processando = false;
 
 document.getElementById("start").onclick = () => {
   recognition.start();
   document.getElementById("start").innerText = "🎙️ Ouvindo...";
 }
 
-// função que processa a fila de palavras e mostra no VLibras
+// função que processa a fila de palavras
 function processarFila(){
     if(filaPalavras.length > 0){
+        processando = true;
         const palavra = filaPalavras.shift();
         legendaDiv.innerText = palavra; // VLibras lê automaticamente
         setTimeout(processarFila, tempoEntrePalavras);
     } else {
+        processando = false;
         legendaDiv.innerText = ""; // limpa quando a fila acabar
     }
 }
@@ -109,8 +112,9 @@ recognition.onresult = (event) => {
             // adiciona palavras à fila
             let palavras = transcript.split(" ");
             filaPalavras.push(...palavras);
-            // se a fila estava vazia antes, inicia o processamento
-            if(filaPalavras.length === palavras.length){
+            
+            // se não estiver processando, inicia o processamento
+            if(!processando){
                 processarFila();
             }
         }
@@ -118,7 +122,7 @@ recognition.onresult = (event) => {
 }
 
 recognition.onend = ()=>{
-    recognition.start();
+    recognition.start(); // microfone contínuo
 }
 
 recognition.onerror = (event) => {
