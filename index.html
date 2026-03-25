@@ -5,48 +5,80 @@
 <title>Tradutor Voz → Libras</title>
 
 <style>
+/* Reset simples */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
 body{
-  background: linear-gradient(135deg,#5b4d9d,#7aa8ff);
-  color:white;
-  font-family:Arial;
+  background: linear-gradient(135deg,#3b3b8f,#5b9fff);
+  color:#f5f5f5;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   display:flex;
   flex-direction:column;
   align-items:center;
   justify-content:center;
   height:100vh;
-  margin:0;
   text-align:center;
+  transition: background 0.5s ease;
 }
 
 h1{
-  font-weight:300;
-  letter-spacing:2px;
+  font-weight: 400;
+  letter-spacing: 1px;
+  font-size: 3rem;
+  margin-bottom: 10px;
+  color: #fff;
+  text-shadow: 1px 1px 5px rgba(0,0,0,0.3);
+}
+
+p{
+  font-size: 1.2rem;
+  margin-bottom: 30px;
+  color: #e0e0e0;
 }
 
 button{
-  margin-top:30px;
-  padding:16px 40px;
-  font-size:20px;
+  padding: 16px 45px;
+  font-size: 1.2rem;
   border:none;
-  border-radius:12px;
-  background:linear-gradient(135deg,#c6b7ff,#9fd2ff);
-  color:#2b2b2b;
-  font-weight:bold;
+  border-radius: 50px;
+  background: linear-gradient(135deg,#ffd06b,#ff6b6b);
+  color: #222;
+  font-weight: 600;
   cursor:pointer;
+  box-shadow: 0 8px 15px rgba(0,0,0,0.2);
+  transition: all 0.3s ease;
+}
+
+button:hover{
+  transform: translateY(-3px);
+  box-shadow: 0 12px 20px rgba(0,0,0,0.3);
 }
 
 #legenda{
-  position:fixed;
-  bottom:40px;
-  left:50%;
-  transform:translateX(-50%);
-  background:rgba(0,0,0,0.7);
-  padding:12px 24px;
-  border-radius:12px;
-  font-size:22px;
-  max-width:80%;
-  min-height:30px;
-  text-align:center;
+  position: fixed;
+  bottom: 50px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0,0,0,0.65);
+  padding: 15px 30px;
+  border-radius: 25px;
+  font-size: 1.3rem;
+  max-width: 80%;
+  min-height: 40px;
+  text-align: center;
+  color: #fff;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+
+/* Fade-in quando muda */
+#legenda.mostrar {
+  opacity: 1;
 }
 </style>
 </head>
@@ -82,26 +114,31 @@ recognition.lang = "pt-BR";
 recognition.continuous = true;
 recognition.interimResults = true;
 
-let filaPalavras = [];
-const tempoEntrePalavras = 3500; // cada palavra aparece por 3,5 segundos
+let textoFinal = ""; // acumula toda a fala
+let filaPalavras = []; // fila para sumir palavras individualmente
+const tempoPalavra = 3500; // 3,5 segundos
 const legendaDiv = document.getElementById("legenda");
 let processando = false;
 
 document.getElementById("start").onclick = () => {
-  recognition.start();
-  document.getElementById("start").innerText = "🎙️ Ouvindo...";
+    recognition.start();
+    document.getElementById("start").innerText = "🎙️ Ouvindo...";
+    legendaDiv.classList.add('mostrar'); // mostra legenda ao iniciar
 }
 
-// função que processa a fila de palavras
+// processa a fila de palavras para sumirem sem apagar tudo
 function processarFila(){
     if(filaPalavras.length > 0){
         processando = true;
-        const palavra = filaPalavras.shift();
-        legendaDiv.innerText = palavra; // VLibras lê automaticamente
-        setTimeout(processarFila, tempoEntrePalavras);
+        const palavraObj = filaPalavras.shift();
+        // remove a palavra antiga do textoFinal após o tempo definido
+        setTimeout(()=>{
+            textoFinal = textoFinal.replace(new RegExp("\\b"+palavraObj.palavra+"\\b"), "").replace(/\s{2,}/g," ").trim();
+            legendaDiv.innerText = textoFinal;
+        }, tempoPalavra);
+        processarFila();
     } else {
         processando = false;
-        legendaDiv.innerText = ""; // limpa quando a fila acabar
     }
 }
 
@@ -109,11 +146,16 @@ recognition.onresult = (event) => {
     for(let i = event.resultIndex; i < event.results.length; i++){
         let transcript = event.results[i][0].transcript.trim();
         if(event.results[i].isFinal){
-            // adiciona palavras à fila
-            let palavras = transcript.split(" ");
-            filaPalavras.push(...palavras);
-            
-            // se não estiver processando, inicia o processamento
+            // adiciona a frase completa
+            textoFinal += (textoFinal ? " " : "") + transcript;
+            legendaDiv.innerText = textoFinal;
+            legendaDiv.classList.add('mostrar');
+
+            // adiciona cada palavra à fila
+            transcript.split(" ").forEach(p => {
+                filaPalavras.push({palavra: p});
+            });
+
             if(!processando){
                 processarFila();
             }
@@ -122,7 +164,7 @@ recognition.onresult = (event) => {
 }
 
 recognition.onend = ()=>{
-    recognition.start(); // microfone contínuo
+    recognition.start();
 }
 
 recognition.onerror = (event) => {
