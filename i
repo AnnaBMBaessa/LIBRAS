@@ -19,11 +19,6 @@ margin:0;
 text-align:center;
 }
 
-h1{
-font-weight:300;
-letter-spacing:2px;
-}
-
 button{
 margin-top:30px;
 padding:16px 40px;
@@ -41,11 +36,20 @@ position:fixed;
 bottom:40px;
 left:50%;
 transform:translateX(-50%);
-background:rgba(0,0,0,0.7);
-padding:12px 24px;
-border-radius:12px;
+background:rgba(0,0,0,0.85);
+padding:16px 30px;
+border-radius:14px;
 font-size:22px;
-max-width:80%;
+max-width:70%;
+text-align:center;
+line-height:1.4;
+
+opacity:0;
+transition:opacity 0.3s ease;
+}
+
+#legenda.show{
+opacity:1;
 }
 
 </style>
@@ -54,15 +58,13 @@ max-width:80%;
 <body>
 
 <h1>🎤 Voz para Libras</h1>
-
-<p>Fale normalmente. O avatar irá traduzir.</p>
+<p>Fale normalmente.</p>
 
 <button id="start">Iniciar Microfone</button>
 
-<!-- texto oculto -->
 <div id="legenda"></div>
 
-<!-- VLibras container -->
+<!-- VLibras -->
 <div vw class="enabled">
 <div vw-access-button class="active"></div>
 <div vw-plugin-wrapper>
@@ -78,65 +80,65 @@ new window.VLibras.Widget('https://vlibras.gov.br/app');
 
 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
-if(!SpeechRecognition){
-alert("Seu navegador não suporta reconhecimento de voz.");
-}
-
 const recognition = new SpeechRecognition();
 
 recognition.lang = "pt-BR";
 recognition.continuous = true;
-recognition.interimResults = true;
+recognition.interimResults = false; // 🔥 DESATIVA resultado parcial
 
-let textoFinal = "";
+let timeoutLegenda;
+const DURACAO_LEGENDA = 5500; // duração da legenda em milissegundos (5,5s)
 
 document.getElementById("start").onclick = () => {
-recognition.start();
+    recognition.start();
 }
 
 recognition.onresult = (event) => {
+    for(let i = event.resultIndex; i < event.results.length; i++){
+        if(event.results[i].isFinal){
+            let frase = event.results[i][0].transcript.trim();
 
-let textoTemp = "";
-
-for(let i = event.resultIndex; i < event.results.length; i++){
-
-let transcript = event.results[i][0].transcript;
-
-if(event.results[i].isFinal){
-textoFinal += transcript + " ";
-}else{
-textoTemp += transcript;
+            if(frase.length > 0){
+                mostrarLegenda(frase);
+            }
+        }
+    }
 }
 
-}
-if(textoFinal.length > 300){
-textoFinal = textoFinal.slice(-150);
-}
-let texto = textoFinal + textoTemp;
+function mostrarLegenda(texto){
+    const legenda = document.getElementById("legenda");
 
-document.getElementById("legenda").innerText = texto;
+    // quebra simples em 2 linhas
+    if(texto.length > 60){
+        let meio = Math.floor(texto.length / 2);
+        let quebra = texto.lastIndexOf(" ", meio);
+        if(quebra !== -1){
+            texto = texto.slice(0, quebra) + "\n" + texto.slice(quebra + 1);
+        }
+    }
 
-/* força atualização do VLibras */
-setTimeout(()=>{
-document.getElementById("legenda").innerText = texto;
-},100);
+    legenda.innerText = texto;
+    legenda.classList.add("show");
 
+    clearTimeout(timeoutLegenda);
+
+    timeoutLegenda = setTimeout(()=>{
+        legenda.classList.remove("show");
+    }, DURACAO_LEGENDA);
 }
 
 recognition.onend = ()=>{
-recognition.start();
+    recognition.start();
 }
+
 recognition.onerror = (event) => {
-console.error("Erro:", event.error);
+    console.error("Erro:", event.error);
 
-if(event.error === "not-allowed"){
-alert("Permissão do microfone negada!");
+    if(event.error === "not-allowed"){
+        alert("Permissão do microfone negada!");
+    }
 }
 
-if(event.error === "no-speech"){
-console.log("Nenhuma fala detectada");
-}
-}
 </script>
 
 </body>
