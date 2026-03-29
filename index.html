@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<title>Tradus</title>
+<title>Tradutor Voz → Libras</title>
 
 <style>
 
@@ -36,13 +36,13 @@ position:fixed;
 bottom:40px;
 left:50%;
 transform:translateX(-50%);
-background:rgba(0,0,0,0.8);
-padding:14px 28px;
+background:rgba(0,0,0,0.85);
+padding:16px 30px;
 border-radius:14px;
 font-size:22px;
 max-width:70%;
-line-height:1.4;
 text-align:center;
+line-height:1.4;
 
 opacity:0;
 transition:opacity 0.3s ease;
@@ -86,7 +86,7 @@ recognition.lang = "pt-BR";
 recognition.continuous = true;
 recognition.interimResults = true;
 
-let textoFixo = "";   // o que já foi confirmado
+let fraseAtual = "";
 let timeoutLegenda;
 
 document.getElementById("start").onclick = () => {
@@ -103,51 +103,44 @@ let transcript = event.results[i][0].transcript;
 
 if(event.results[i].isFinal){
 
-/* adiciona ao texto fixo (não perde mais) */
-textoFixo += transcript + " ";
+/* guarda frase completa */
+fraseAtual = transcript.trim();
+
+/* mostra frase final */
+mostrarLegenda(fraseAtual, true);
 
 }else{
 
 parcial = transcript;
 
+/* mostra parcial SEM apagar frase anterior */
+mostrarLegenda(parcial, false);
+
+}
+
 }
 
 }
 
-/* junta fixo + parcial */
-let textoAtual = textoFixo + parcial;
-
-/* limita tamanho (tipo legenda real) */
-if(textoAtual.length > 120){
-textoFixo = textoAtual.slice(-80);
-textoAtual = textoFixo;
-}
-
-/* mostra legenda */
-mostrarLegenda(textoAtual, parcial === "");
-
-}
-
-function mostrarLegenda(texto, terminouFrase){
+function mostrarLegenda(texto, final){
 
 const legenda = document.getElementById("legenda");
 
 legenda.innerText = texto;
 legenda.classList.add("show");
 
-/* enquanto está falando → não some */
-if(!terminouFrase){
+/* enquanto fala → não some */
+if(!final){
 clearTimeout(timeoutLegenda);
 return;
 }
 
-/* terminou → começa sumir */
+/* terminou frase → segura e some */
 clearTimeout(timeoutLegenda);
 
 timeoutLegenda = setTimeout(()=>{
 legenda.classList.remove("show");
-textoFixo = ""; // limpa depois que some
-},2500);
+},3000);
 
 }
 
