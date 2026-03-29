@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Voz → Libras (Legenda estilo YouTube)</title>
+
+<style>
+
+body{
+background: linear-gradient(135deg,#5b4d9d,#7aa8ff);
+color:white;
+font-family:Arial;
+display:flex;
+flex-direction:column;
+align-items:center;
+justify-content:center;
+height:100vh;
+margin:0;
+text-align:center;
+}
+
+h1{
+font-weight:300;
+}
+
+button{
+margin-top:30px;
+padding:16px 40px;
+font-size:20px;
+border:none;
+border-radius:12px;
+background:linear-gradient(135deg,#c6b7ff,#9fd2ff);
+color:#2b2b2b;
+font-weight:bold;
+cursor:pointer;
+}
+
+#legenda{
+position:fixed;
+bottom:40px;
+left:50%;
+transform:translateX(-50%);
+background:rgba(0,0,0,0.85);
+padding:16px 24px;
+border-radius:12px;
+font-size:22px;
+max-width:75%;
+line-height:1.5;
+text-align:left;
+
+opacity:0;
+transition:opacity 0.3s ease;
+}
+
+#legenda.show{
+opacity:1;
+}
+
+.linha{
+display:block;
+margin-bottom:4px;
+}
+
+</style>
+</head>
+
+<body>
+
+<h1>🎤 Voz para Libras</h1>
+<p>Legenda contínua estilo YouTube</p>
+
+<button id="start">Iniciar Microfone</button>
+
+<div id="legenda"></div>
+
+<!-- VLibras -->
+<div vw class="enabled">
+<div vw-access-button class="active"></div>
+<div vw-plugin-wrapper>
+<div class="vw-plugin-top-wrapper"></div>
+</div>
+</div>
+
+<script src="https://vlibras.gov.br/app/vlibras-plugin.js"></script>
+
+<script>
+
+new window.VLibras.Widget('https://vlibras.gov.br/app');
+
+const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+if(!SpeechRecognition){
+alert("Seu navegador não suporta reconhecimento de voz.");
+}
+
+const recognition = new SpeechRecognition();
+
+recognition.lang = "pt-BR";
+recognition.continuous = true;
+recognition.interimResults = false; // importante
+
+let linhas = [];
+const MAX_LINHAS = 3;
+
+document.getElementById("start").onclick = () => {
+recognition.start();
+}
+
+recognition.onresult = (event) => {
+
+for(let i = event.resultIndex; i < event.results.length; i++){
+
+if(event.results[i].isFinal){
+
+let texto = event.results[i][0].transcript.trim();
+
+if(texto.length === 0) continue;
+
+/* adiciona nova linha */
+linhas.push(texto);
+
+/* mantém só as últimas */
+if(linhas.length > MAX_LINHAS){
+linhas.shift();
+}
+
+renderLegenda();
+
+}
+
+}
+
+}
+
+function renderLegenda(){
+
+const legenda = document.getElementById("legenda");
+
+legenda.innerHTML = linhas
+  .map(l => `<span class="linha">${l}</span>`)
+  .join("");
+
+legenda.classList.add("show");
+
+}
+
+/* reinicia automático */
+recognition.onend = ()=>{
+recognition.start();
+}
+
+recognition.onerror = (event) => {
+console.error("Erro:", event.error);
+
+if(event.error === "not-allowed"){
+alert("Permissão do microfone negada!");
+}
+
+}
+
+</script>
+
+</body>
+</html>
