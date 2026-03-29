@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<title>T → Libras</title>
+<title>Tradutor Voz → Libras</title>
 
 <style>
 
@@ -41,17 +41,22 @@ position:fixed;
 bottom:40px;
 left:50%;
 transform:translateX(-50%);
-background:rgba(0,0,0,0.7);
-padding:12px 24px;
-border-radius:12px;
+background:rgba(0,0,0,0.75);
+padding:14px 28px;
+border-radius:14px;
 font-size:22px;
-max-width:80%;
+max-width:70%;
+text-align:center;
+line-height:1.4;
+
 opacity:0;
-transition:opacity 0.5s ease;
+transition:opacity 0.4s ease, transform 0.4s ease;
+transform:translate(-50%, 10px);
 }
 
 #legenda.show{
 opacity:1;
+transform:translate(-50%, 0);
 }
 
 </style>
@@ -94,42 +99,77 @@ recognition.interimResults = true;
 
 let timeoutLegenda;
 
+/* limita e quebra em duas linhas estilo filme */
+function formatarLegenda(texto){
+
+const maxChars = 80;
+
+if(texto.length > maxChars){
+texto = texto.slice(-maxChars);
+}
+
+/* tenta quebrar em 2 linhas */
+let meio = Math.floor(texto.length / 2);
+let quebra = texto.lastIndexOf(" ", meio);
+
+if(quebra !== -1){
+return texto.slice(0, quebra) + "\n" + texto.slice(quebra + 1);
+}
+
+return texto;
+}
+
 document.getElementById("start").onclick = () => {
 recognition.start();
 }
 
 recognition.onresult = (event) => {
 
+let parcial = "";
+
 for(let i = event.resultIndex; i < event.results.length; i++){
 
 let transcript = event.results[i][0].transcript;
 
-/* mostra tanto parcial quanto final */
-mostrarLegenda(transcript);
+if(event.results[i].isFinal){
+
+mostrarLegenda(transcript, true);
+
+}else{
+
+parcial = transcript;
+mostrarLegenda(parcial, false);
 
 }
 
 }
 
-/* função estilo legenda de filme */
-function mostrarLegenda(texto){
+}
+
+function mostrarLegenda(texto, final){
 
 const legenda = document.getElementById("legenda");
 
-legenda.innerText = texto;
+/* formata estilo Netflix */
+legenda.innerText = formatarLegenda(texto);
 legenda.classList.add("show");
 
-/* cancela sumiço anterior */
+/* enquanto fala → não some */
+if(!final){
+clearTimeout(timeoutLegenda);
+return;
+}
+
+/* terminou frase → inicia sumiço */
 clearTimeout(timeoutLegenda);
 
-/* desaparece depois de 3s */
 timeoutLegenda = setTimeout(()=>{
 legenda.classList.remove("show");
 },3000);
 
 }
 
-/* reinicia automaticamente */
+/* reinicia automático */
 recognition.onend = ()=>{
 recognition.start();
 }
