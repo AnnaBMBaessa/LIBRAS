@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Voz → Libras MVP</title>
+<style>
+body{
+    font-family: Arial, sans-serif;
+    text-align: center;
+    background: linear-gradient(135deg, #6a0dad, #00c6ff);
+    color: #fff;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+button{
+    padding: 15px 40px;
+    font-size: 1.2rem;
+    border: none;
+    border-radius: 25px;
+    background: linear-gradient(135deg, #ff8a00, #e52e71);
+    cursor: pointer;
+}
+#legenda{
+    margin-top: 20px;
+    font-size: 1.5rem;
+    background: rgba(0,0,0,0.5);
+    padding: 15px 25px;
+    border-radius: 15px;
+    min-width: 300px;
+    line-height: 1.4;
+    white-space: pre-line;
+}
+#avatar{
+    margin-top: 40px;
+    font-size: 5rem;
+    height: 120px;
+}
+</style>
+</head>
+<body>
+
+<h1>🎤 Voz → Libras MVP</h1>
+<button id="start">Iniciar Microfone</button>
+<div id="legenda"></div>
+<div id="avatar">🤟</div>
+
+<script>
+const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+const recognition = new SpeechRecognition();
+recognition.lang = 'pt-BR';
+recognition.continuous = true;
+recognition.interimResults = true;
+
+let filaAnimacao = [];
+let animando = false;
+
+const legenda = document.getElementById('legenda');
+const avatar = document.getElementById('avatar');
+
+const sinais = {
+    "oi": "👋",
+    "tchau": "✋",
+    "obrigado": "🙏",
+    "amor": "❤️",
+    "sim": "👍",
+    "não": "👎",
+    "bom": "😃",
+    "ruim": "😞"
+    // você pode adicionar mais palavras e emojis ou imagens de sinais
+};
+
+document.getElementById('start').onclick = () => recognition.start();
+
+recognition.onresult = (event) => {
+    for(let i = event.resultIndex; i < event.results.length; i++){
+        const result = event.results[i];
+        const texto = result[0].transcript.trim().toLowerCase();
+        if(texto.length > 0){
+            legenda.innerText = texto; // legenda em tempo real
+
+            if(result.isFinal){
+                // separar em palavras
+                const palavras = texto.split(" ");
+                palavras.forEach(p => filaAnimacao.push(p));
+                processarFila();
+            }
+        }
+    }
+};
+
+function processarFila(){
+    if(animando || filaAnimacao.length === 0) return;
+    animando = true;
+
+    const palavra = filaAnimacao.shift();
+    avatar.innerText = sinais[palavra] || "🤟"; // mostra sinal ou gesto padrão
+
+    // tempo da animação: 700ms por palavra
+    setTimeout(()=>{
+        animando = false;
+        processarFila();
+    }, 700);
+}
+
+recognition.onerror = (e) => console.error("Erro:", e);
+
+recognition.onend = () => recognition.start();
+</script>
+
+</body>
+</html>
