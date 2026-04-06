@@ -119,6 +119,10 @@ recognition.interimResults = true; // tempo real
 
 let timeoutLegenda;
 
+// fila para frases finais do VLibras
+let filaVLibras = [];
+let processandoVLibras = false;
+
 document.getElementById("start").onclick = () => {
     recognition.start();
 }
@@ -160,10 +164,27 @@ function mostrarLegenda(texto, enviarParaVLibras){
         legenda.classList.remove("show");
     },3500);
 
-    // só dispara VLibras se for frase final
     if(enviarParaVLibras){
-        legenda.click();
+        filaVLibras.push(texto);
+        processarFilaVLibras();
     }
+}
+
+function processarFilaVLibras(){
+    if(processandoVLibras || filaVLibras.length === 0) return;
+
+    processandoVLibras = true;
+    const frase = filaVLibras.shift();
+
+    const legenda = document.getElementById("legenda");
+    legenda.innerText = frase;
+    legenda.click();
+
+    // espera 3.5s antes de processar a próxima frase
+    setTimeout(()=>{
+        processandoVLibras = false;
+        processarFilaVLibras();
+    }, 3500);
 }
 
 recognition.onend = () => {
