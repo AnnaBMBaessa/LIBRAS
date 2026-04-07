@@ -31,12 +31,14 @@ body{
     align-items:center;
     justify-content:center;
     background:#111;
-    box-shadow: 0 0 20px rgba(255,255,255,0.1);
+    cursor:pointer;
     transition:0.3s;
+    box-shadow: 0 0 20px rgba(255,255,255,0.1);
 }
 
 .mic.ativo{
     box-shadow: 0 0 40px #22c55e;
+    transform: scale(1.05);
 }
 
 .mic img{
@@ -47,17 +49,6 @@ body{
     margin-top:20px;
     font-size:1.2rem;
     opacity:0.8;
-}
-
-button{
-    margin-top:30px;
-    padding:15px 40px;
-    border:none;
-    border-radius:30px;
-    font-size:1rem;
-    cursor:pointer;
-    background:#3b82f6;
-    color:white;
 }
 
 /* LADO DIREITO */
@@ -115,9 +106,7 @@ button{
         <img src="https://cdn-icons-png.flaticon.com/512/61/61088.png">
     </div>
 
-    <div id="status" class="status">Microfone desligado</div>
-
-    <button id="btn">Iniciar</button>
+    <div id="status" class="status">Clique no microfone para iniciar</div>
 </div>
 
 <div class="right">
@@ -149,22 +138,19 @@ recognition.interimResults = true;
 let ativo = false;
 let timeoutLegenda;
 
-const btn = document.getElementById("btn");
 const mic = document.getElementById("mic");
 const status = document.getElementById("status");
 
-// BOTÃO
-btn.onclick = () => {
+// 🔥 CLICK NO MICROFONE
+mic.onclick = () => {
     if(!ativo){
         recognition.start();
         ativo = true;
-        btn.innerText = "Parar";
         status.innerText = "Microfone ativo";
         mic.classList.add("ativo");
     } else {
         recognition.stop();
         ativo = false;
-        btn.innerText = "Iniciar";
         status.innerText = "Microfone desligado";
         mic.classList.remove("ativo");
     }
@@ -192,7 +178,7 @@ recognition.onresult = (event) => {
     }
 };
 
-// MOSTRAR LEGENDA + VLIBRAS
+// MOSTRAR LEGENDA
 function mostrarLegenda(texto){
     const legenda = document.getElementById("legenda");
 
@@ -226,7 +212,6 @@ recognition.onerror = (event) => {
     if(event.error === "not-allowed" || event.error === "not-found"){
         alert("Microfone não disponível ou bloqueado");
         ativo = false;
-        btn.innerText = "Iniciar";
         status.innerText = "Microfone desligado";
         mic.classList.remove("ativo");
     }
