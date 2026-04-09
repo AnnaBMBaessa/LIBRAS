@@ -2,16 +2,14 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<title>Voz → Libras</title>
+<title>Voz → Libras Pro</title>
 
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
-
 *{
-    box-sizing:border-box;
     margin:0;
     padding:0;
-    font-family:'Roboto', Arial, sans-serif;
+    box-sizing:border-box;
+    font-family:Arial, sans-serif;
 }
 
 body{
@@ -19,69 +17,77 @@ body{
     display:flex;
     align-items:center;
     justify-content:flex-start;
-    padding-left:80px;
-    background: linear-gradient(135deg, #6a0dad, #00c6ff);
-    color:#fff;
+    padding-left:70px;
+    background: linear-gradient(135deg, #0f172a, #2563eb);
+    color:white;
 }
 
 /* MIC */
 .mic{
-    width:140px;
-    height:140px;
+    width:150px;
+    height:150px;
     border-radius:50%;
+    background:#111;
     display:flex;
     align-items:center;
     justify-content:center;
-    background:#111;
     cursor:pointer;
     transition:0.3s;
-    box-shadow: 0 0 20px rgba(0,0,0,0.3);
+    box-shadow:0 0 20px rgba(0,0,0,0.4);
 }
 
 .mic.ativo{
-    box-shadow: 0 0 40px #22c55e;
-    transform: scale(1.08);
+    transform:scale(1.08);
+    box-shadow:0 0 40px #22c55e;
 }
 
 .mic img{
     width:70px;
-    pointer-events:none;
 }
 
 /* STATUS */
 #status{
-    margin-left:40px;
-    font-size:1.2rem;
+    margin-left:30px;
+    font-size:18px;
     opacity:0.9;
 }
 
 /* LEGENDA */
 #legenda{
     position:fixed;
-    bottom:50px;
+    bottom:40px;
     left:50%;
     transform:translateX(-50%);
-    background: rgba(0,0,0,0.7);
-    padding:18px 35px;
-    border-radius:20px;
-    font-size:1.3rem;
-    max-width:75%;
+    background:rgba(0,0,0,0.75);
+    padding:16px 26px;
+    border-radius:16px;
+    max-width:80%;
     text-align:center;
+    font-size:20px;
     line-height:1.5;
     opacity:0;
     transition:0.3s;
-    backdrop-filter: blur(8px);
-    white-space: pre-line;
+    white-space:pre-line;
+    backdrop-filter: blur(10px);
 }
 
 #legenda.show{
     opacity:1;
 }
 
+/* emoção */
+#emotion{
+    position:fixed;
+    top:20px;
+    right:20px;
+    padding:10px 15px;
+    border-radius:12px;
+    background:rgba(0,0,0,0.4);
+    font-size:14px;
+}
+
 /* VLibras */
-[vw],
-[vw-access-button],
-.vw-plugin-wrapper{
+[vw], [vw-access-button], .vw-plugin-wrapper{
     pointer-events:auto !important;
 }
 </style>
@@ -89,16 +95,15 @@ body{
 
 <body>
 
-<!-- MIC + STATUS -->
 <div style="display:flex; align-items:center;">
     <div id="mic" class="mic">
         <img src="https://cdn-icons-png.flaticon.com/512/61/61088.png">
     </div>
-
     <div id="status">Ativar microfone</div>
 </div>
 
 <div id="legenda"></div>
+<div id="emotion">🙂 neutro</div>
 
 <!-- VLibras -->
 <div vw class="enabled">
@@ -113,7 +118,9 @@ body{
 <script>
 new window.VLibras.Widget('https://vlibras.gov.br/app');
 
-/* Speech Recognition */
+/* =========================
+   SPEECH RECOGNITION
+========================= */
 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 const recognition = new SpeechRecognition();
 
@@ -122,16 +129,24 @@ recognition.continuous = true;
 recognition.interimResults = true;
 
 let ativo = false;
-let timeoutLegenda;
 
-/* 🔥 FILA VLIBRAS */
+/* =========================
+   FILAS INTELIGENTES
+========================= */
 let filaVLibras = [];
-let vlibrasRodando = false;
+let executandoVLibras = false;
 
+/* =========================
+   ELEMENTOS
+========================= */
 const mic = document.getElementById("mic");
 const status = document.getElementById("status");
+const legenda = document.getElementById("legenda");
+const emotionBox = document.getElementById("emotion");
 
-/* MIC ON/OFF */
+/* =========================
+   MIC
+========================= */
 mic.onclick = () => {
     if(!ativo){
         recognition.start();
@@ -146,92 +161,109 @@ mic.onclick = () => {
     }
 };
 
-/* VOZ → TEXTO */
+/* =========================
+   VOZ → TEXTO
+========================= */
 recognition.onresult = (event) => {
-    let textoFinal = "";
-    let textoParcial = "";
+    let texto = "";
 
     for(let i = event.resultIndex; i < event.results.length; i++){
-        let transcript = event.results[i][0].transcript;
-
-        if(event.results[i].isFinal){
-            textoFinal += transcript + " ";
-        } else {
-            textoParcial += transcript;
-        }
+        texto += event.results[i][0].transcript;
     }
 
-    let texto = (textoFinal + textoParcial).trim();
-
-    if(texto.length > 0){
-        mostrarLegenda(texto);
+    texto = texto.trim();
+    if(texto){
+        processarTexto(texto);
     }
 };
 
-/* LEGENDA + FILA VLIBRAS */
-function mostrarLegenda(texto){
-    const legenda = document.getElementById("legenda");
+/* =========================
+   PROCESSAMENTO PRINCIPAL
+========================= */
+function processarTexto(texto){
 
-    if(texto.length > 60){
-        let meio = Math.floor(texto.length / 2);
-        let quebra = texto.lastIndexOf(" ", meio);
-        if(quebra !== -1){
-            texto = texto.slice(0, quebra) + "\n" + texto.slice(quebra + 1);
-        }
+    mostrarEmocao(texto);
+
+    mostrarLegenda(texto);
+
+    const palavras = texto.split(" ");
+
+    palavras.forEach((p, i) => {
+        filaVLibras.push({
+            palavra: p,
+            delay: i * 900
+        });
+    });
+
+    processarFila();
+}
+
+/* =========================
+   EMOÇÃO SIMPLES
+========================= */
+function mostrarEmocao(texto){
+    const t = texto.toLowerCase();
+
+    let emo = "🙂 neutro";
+
+    if(t.includes("obrigado") || t.includes("feliz") || t.includes("bom")){
+        emo = "😄 positivo";
+    }
+    if(t.includes("triste") || t.includes("ruim") || t.includes("dor")){
+        emo = "😢 negativo";
+    }
+    if(t.includes("urgente") || t.includes("agora") || t.includes("ajuda")){
+        emo = "🚨 urgente";
     }
 
+    emotionBox.innerText = emo;
+}
+
+/* =========================
+   LEGENDA
+========================= */
+function mostrarLegenda(texto){
     legenda.innerText = texto;
     legenda.classList.add("show");
 
-    clearTimeout(timeoutLegenda);
-    timeoutLegenda = setTimeout(()=>{
+    setTimeout(() => {
         legenda.classList.remove("show");
-    },3500);
-
-    // 🔥 entra na fila do VLibras
-    filaVLibras.push(texto);
-    processarFilaVLibras();
+    }, 4000);
 }
 
-/* 🔥 PROCESSA FILA VLIBRAS (não interrompe fala anterior) */
-function processarFilaVLibras(){
-    if(vlibrasRodando) return;
+/* =========================
+   FILA VLIBRAS (INTELIGENTE)
+========================= */
+function processarFila(){
+
+    if(executandoVLibras) return;
     if(filaVLibras.length === 0) return;
 
-    vlibrasRodando = true;
+    executandoVLibras = true;
 
-    const texto = filaVLibras.shift();
-
-    const btn = document.querySelector('[vw-access-button]');
-    if(btn){
-        btn.click();
-    }
-
-    // tempo estimado de execução da Libras
-    const tempo = Math.min(6000, 2000 + texto.length * 80);
+    const item = filaVLibras.shift();
 
     setTimeout(() => {
-        vlibrasRodando = false;
-        processarFilaVLibras();
-    }, tempo);
+
+        const btn = document.querySelector('[vw-access-button]');
+        if(btn) btn.click();
+
+        const tempo = 600 + item.palavra.length * 120;
+
+        setTimeout(() => {
+            executandoVLibras = false;
+            processarFila();
+        }, tempo);
+
+    }, item.delay);
 }
 
-/* REINÍCIO */
+/* =========================
+   REINÍCIO
+========================= */
 recognition.onend = () => {
     if(ativo){
-        setTimeout(()=> recognition.start(), 200);
-    }
-};
-
-/* ERROS */
-recognition.onerror = (event) => {
-    console.error(event.error);
-
-    if(event.error === "not-allowed"){
-        alert("Permissão do microfone negada!");
-        ativo = false;
-        mic.classList.remove("ativo");
-        status.innerText = "Ativar microfone";
+        setTimeout(() => recognition.start(), 200);
     }
 };
 </script>
