@@ -23,33 +23,33 @@ body{
     gap:18px;
 }
 
-/* 🎤 MIC */
+/* 🎤 MIC ESTILO PREMIUM (SIRI STYLE) */
 .mic{
-    width:150px;
-    height:150px;
+    width:160px;
+    height:160px;
     border-radius:50%;
     cursor:pointer;
     position:relative;
 
-    background: radial-gradient(circle at 35% 30%, #2c2f36, #0e1117 70%);
+    background: radial-gradient(circle at 30% 30%, #2f343c, #0c0f14 70%);
 
     box-shadow:
-        0 12px 28px rgba(0,0,0,0.65),
-        inset 0 2px 10px rgba(255,255,255,0.05),
-        inset 0 -6px 12px rgba(0,0,0,0.6);
+        0 20px 40px rgba(0,0,0,0.6),
+        inset 0 2px 12px rgba(255,255,255,0.05),
+        inset 0 -8px 18px rgba(0,0,0,0.7);
 
     transition:0.25s ease;
 }
 
-/* grelha do mic */
+/* brilho interno sutil */
 .mic::before{
     content:"";
     position:absolute;
-    top:28px;
+    top:30px;
     left:50%;
     transform:translateX(-50%);
-    width:58px;
-    height:70px;
+    width:60px;
+    height:80px;
     border-radius:18px;
 
     background:
@@ -66,41 +66,55 @@ body{
         inset 0 -2px 6px rgba(255,255,255,0.1);
 }
 
-/* base */
+/* base mic */
 .mic::after{
     content:"";
     position:absolute;
-    bottom:-35px;
+    bottom:-40px;
     left:50%;
     transform:translateX(-50%);
-    width:10px;
-    height:45px;
+    width:12px;
+    height:50px;
     border-radius:6px;
 
     background: linear-gradient(180deg, #8c8f96, #3f434a);
 
-    box-shadow: 0 5px 10px rgba(0,0,0,0.5);
+    box-shadow: 0 6px 12px rgba(0,0,0,0.5);
+}
+
+/* hover */
+.mic:hover{
+    transform: scale(1.04);
 }
 
 /* ativo */
 .mic.ativo{
     box-shadow:
-        0 0 25px rgba(80,160,255,0.35),
-        0 12px 28px rgba(0,0,0,0.65),
-        inset 0 2px 10px rgba(255,255,255,0.05);
+        0 0 30px rgba(80,160,255,0.4),
+        0 20px 40px rgba(0,0,0,0.6),
+        inset 0 2px 12px rgba(255,255,255,0.05);
 }
 
-/* STATUS */
+/* STATUS BONITO */
 #status{
     font-size:1.15rem;
     font-weight:500;
     color:#d6d6d6;
 
-    padding:6px 14px;
+    padding:8px 16px;
     border-radius:999px;
 
     background: rgba(255,255,255,0.04);
-    backdrop-filter: blur(6px);
+    backdrop-filter: blur(8px);
+
+    transition:0.3s ease;
+}
+
+/* ativo */
+#status.ativo{
+    color:#22c55e;
+    background: rgba(34,197,94,0.12);
+    box-shadow: 0 0 12px rgba(34,197,94,0.2);
 }
 
 /* LEGENDA */
@@ -126,7 +140,7 @@ body{
     opacity:1;
 }
 
-/* VLibras NÃO bloquear clique */
+/* VLibras estável */
 [vw],
 [vw-access-button],
 .vw-plugin-wrapper {
@@ -147,7 +161,7 @@ body{
 
 <div id="legenda"></div>
 
-<!-- VLibras (VERSÃO ESTÁVEL) -->
+<!-- VLibras -->
 <div vw class="enabled">
   <div vw-access-button class="active"></div>
   <div vw-plugin-wrapper>
@@ -158,7 +172,7 @@ body{
 <script src="https://vlibras.gov.br/app/vlibras-plugin.js"></script>
 
 <script>
-/* VLibras inicialização correta */
+/* VLibras estável */
 window.addEventListener("load", () => {
     new window.VLibras.Widget('https://vlibras.gov.br/app');
 });
@@ -184,11 +198,13 @@ mic.onclick = () => {
         ativo = true;
         mic.classList.add("ativo");
         status.innerText = "Desativar microfone";
+        status.classList.add("ativo");
     } else {
         recognition.stop();
         ativo = false;
         mic.classList.remove("ativo");
         status.innerText = "Ativar microfone";
+        status.classList.remove("ativo");
     }
 };
 
