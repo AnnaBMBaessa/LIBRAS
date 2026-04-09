@@ -35,10 +35,9 @@ body{
     cursor:pointer;
     position:relative;
     box-shadow: 0 0 20px rgba(255,255,255,0.1);
-    transition:0.3s;
 }
 
-/* corpo do mic */
+/* corpo mic */
 .mic::before{
     content:"";
     width:40px;
@@ -65,44 +64,23 @@ body{
     transform: scale(1.08);
 }
 
-/* 🎧 ONDAS DE ÁUDIO */
+/* ondas */
 .wave{
     position:absolute;
     border:2px solid #22c55e;
     border-radius:50%;
     opacity:0;
-    transform:scale(1);
 }
 
-/* 3 ondas */
-.wave1{
-    width:160px;
-    height:160px;
-}
+.wave1{ width:160px; height:160px; }
+.wave2{ width:190px; height:190px; }
+.wave3{ width:220px; height:220px; }
 
-.wave2{
-    width:190px;
-    height:190px;
-}
-
-.wave3{
-    width:220px;
-    height:220px;
-}
-
-/* animação */
 @keyframes waveAnim{
-    0%{
-        transform:scale(0.8);
-        opacity:0.6;
-    }
-    100%{
-        transform:scale(1.4);
-        opacity:0;
-    }
+    0%{ transform:scale(0.8); opacity:0.6; }
+    100%{ transform:scale(1.4); opacity:0; }
 }
 
-/* ativa ondas */
 .mic.ativo .wave{
     animation: waveAnim 1.5s infinite;
 }
@@ -136,9 +114,7 @@ body{
     white-space: pre-line;
 }
 
-#legenda.show{
-    opacity:1;
-}
+#legenda.show{ opacity:1; }
 
 /* VLibras livre */
 [vw],
@@ -152,10 +128,8 @@ body{
 <body>
 
 <div class="container">
-
     <div id="mic" class="mic">
 
-        <!-- ondas -->
         <div class="wave wave1"></div>
         <div class="wave wave2"></div>
         <div class="wave wave3"></div>
@@ -180,6 +154,31 @@ body{
 <script>
 new window.VLibras.Widget('https://vlibras.gov.br/app');
 
+/* 🔥 AUTO ATTEMPT (VERSÃO MAIS FORTE) */
+function tentarAutoVLibras(){
+    let tentativas = 0;
+
+    const intervalo = setInterval(() => {
+        const btn = document.querySelector('[vw-access-button]');
+
+        if(btn){
+            btn.click();
+            clearInterval(intervalo);
+        }
+
+        tentativas++;
+        if(tentativas > 10){
+            clearInterval(intervalo);
+        }
+
+    }, 800);
+}
+
+window.addEventListener("load", () => {
+    setTimeout(tentarAutoVLibras, 1000);
+});
+
+/* MICROFONE */
 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 const recognition = new SpeechRecognition();
 
@@ -193,7 +192,7 @@ let timeoutLegenda;
 const mic = document.getElementById("mic");
 const status = document.getElementById("status");
 
-/* 🎤 LIGA / DESLIGA */
+/* LIGA / DESLIGA */
 mic.onclick = () => {
     if(!ativo){
         recognition.start();
@@ -266,8 +265,6 @@ recognition.onend = () => {
 
 /* ERROS */
 recognition.onerror = (event) => {
-    console.error(event.error);
-
     if(event.error === "not-allowed"){
         ativo = false;
         mic.classList.remove("ativo");
