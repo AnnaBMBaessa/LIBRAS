@@ -16,7 +16,15 @@ body{
     background: linear-gradient(135deg, #0f172a, #1e3a8a);
 }
 
-/* 🎤 BOTÃO MICROFONE */
+/* 🔥 WRAPPER ISOLADO DO BOTÃO */
+#mic-wrapper{
+    display:flex;
+    align-items:center;
+    gap:40px;
+    position:relative;
+}
+
+/* 🎤 BOTÃO */
 .mic{
     width:140px;
     height:140px;
@@ -28,8 +36,6 @@ body{
     cursor:pointer;
     transition:0.3s;
     box-shadow: 0 0 20px rgba(255,255,255,0.1);
-    user-select:none;
-    -webkit-user-drag:none;
 }
 
 /* ativo */
@@ -46,9 +52,8 @@ body{
     -webkit-user-drag:none;
 }
 
-/* TEXTO STATUS */
+/* TEXTO */
 #status{
-    margin-left:40px;
     font-size:1.2rem;
     color:white;
     opacity:0.9;
@@ -76,12 +81,15 @@ body{
     opacity:1;
 }
 
-/* 🔥 VLibras não interfere no mic */
-#mic{
-    speak: none;
+/* 🔥 BLOQUEIO DE LEITURA DO BOTÃO */
+#mic-wrapper,
+#mic-wrapper *{
+    speak: none !important;
+    -webkit-user-select: none;
+    user-select: none;
 }
 
-/* VLibras totalmente clicável */
+/* VLibras livre */
 [vw],
 [vw-access-button],
 .vw-plugin-wrapper {
@@ -92,9 +100,9 @@ body{
 
 <body>
 
-<!-- 🎤 BOTÃO + TEXTO -->
-<div style="display:flex; align-items:center;">
-    <div id="mic" class="mic" aria-hidden="true">
+<!-- 🎤 BOTÃO ISOLADO -->
+<div id="mic-wrapper">
+    <div id="mic" class="mic">
         <img src="https://cdn-icons-png.flaticon.com/512/61/61088.png">
     </div>
 
@@ -189,7 +197,7 @@ function mostrarLegenda(texto){
     setTimeout(() => {
         legenda.click();
     },100);
-};
+}
 
 /* REINÍCIO CONTROLADO */
 recognition.onend = () => {
