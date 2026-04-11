@@ -121,7 +121,7 @@ p{
     opacity: 1;
 }
 
-/* BOTÃO AJUDA (CÍRCULO PERFEITO) */
+/* BOTÃO AJUDA (AGORA IGUAL AO MIC BOTÃO) */
 #helpBtn{
     position: fixed;
     top: 20px;
@@ -130,23 +130,23 @@ p{
     height: 55px;
     aspect-ratio: 1 / 1;
     border-radius: 50%;
-    border: 2px solid rgba(255, 215, 0, 0.9);
-    background: radial-gradient(circle at 30% 30%, #ffd700, #b8860b);
-    color: #1a1a1a;
+    border: none;
+    background: linear-gradient(135deg, #1b1b1b, #0a0a0a);
+    color: #fff;
     font-size: 1.6rem;
     font-weight: bold;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 0 18px rgba(255, 215, 0, 0.6);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.4);
     transition: 0.3s;
     z-index: 1000;
+    flex: 0 0 auto;
 }
 
 #helpBtn:hover{
     transform: scale(1.12);
-    box-shadow: 0 0 25px rgba(255, 215, 0, 0.9);
 }
 
 /* MODAL */
@@ -256,7 +256,6 @@ p{
 <script>
 new window.VLibras.Widget('https://vlibras.gov.br/app');
 
-/* AUTO VLIBRAS */
 function iniciarVLibrasAuto() {
     let iniciado = false;
 
@@ -292,18 +291,12 @@ function iniciarVLibrasAuto() {
 
 window.addEventListener("load", iniciarVLibrasAuto);
 
-/* HELP MODAL */
 const helpBtn = document.getElementById("helpBtn");
 const helpModal = document.getElementById("helpModal");
 const closeHelp = document.getElementById("closeHelp");
 
-helpBtn.onclick = () => {
-    helpModal.classList.add("show");
-};
-
-closeHelp.onclick = () => {
-    helpModal.classList.remove("show");
-};
+helpBtn.onclick = () => helpModal.classList.add("show");
+closeHelp.onclick = () => helpModal.classList.remove("show");
 
 helpModal.onclick = (e) => {
     if(e.target === helpModal){
@@ -311,7 +304,6 @@ helpModal.onclick = (e) => {
     }
 };
 
-/* SPEECH */
 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 const recognition = new SpeechRecognition();
 
@@ -373,7 +365,6 @@ recognition.onend = () => {
 };
 
 recognition.onerror = (event) => {
-    console.error("Erro:", event.error);
     if(event.error === "not-allowed"){
         alert("Permissão do microfone negada!");
     }
