@@ -118,7 +118,7 @@ p{
     opacity: 1;
 }
 
-/* BOTÃO AJUDA SEM BRILHO DOURADO */
+/* BOTÃO AJUDA DOURADO SEM BORDA */
 #helpBtn{
     position: fixed;
     top: 20px;
@@ -127,17 +127,23 @@ p{
     height: 55px;
     border-radius: 50%;
     border: none;
-    background: linear-gradient(135deg, #1b1b1b, #0a0a0a);
-    color: #fff;
+
+    background: radial-gradient(circle at 30% 30%, #ffd700, #b8860b);
+
+    color: #1a1a1a;
     font-size: 1.6rem;
     font-weight: bold;
     cursor: pointer;
+
     display: flex;
     align-items: center;
     justify-content: center;
+
     box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+
     transition: 0.3s;
     z-index: 1000;
+
     flex: 0 0 auto;
 }
 
