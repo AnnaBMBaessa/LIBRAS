@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -122,7 +123,7 @@ p{
     opacity: 1;
 }
 
-/* BOTÃO AJUDA AJUSTADO PARA ESQUERDA */
+/* BOTÃO AJUDA */
 #helpBtn{
     position: fixed;
     top: 20px;
@@ -142,7 +143,6 @@ p{
     box-shadow: 0 10px 30px rgba(0,0,0,0.4);
     transition: 0.3s;
     z-index: 1000;
-    flex: 0 0 auto;
 }
 
 #helpBtn:hover{
@@ -211,23 +211,14 @@ p{
 
 <div id="helpModal">
     <div id="helpContent">
-        <h2>Como utilizar a plataforma</h2>
+        <h2>Como usar a plataforma</h2>
         <br>
         <p>
-        1. Ativar o microfone<br>
-        Clique em “Iniciar Microfone” e autorize o acesso ao dispositivo de áudio quando solicitado pelo navegador.<br><br>
-
-        2. Reconhecimento de voz em tempo real<br>
-        Fale de forma natural. O sistema converterá automaticamente sua fala em texto, em tempo real.<br><br>
-
-        3. Exibição de legendas<br>
-        As legendas geradas serão exibidas na parte inferior da tela para acompanhamento contínuo.<br><br>
-
-        4. Tradução em Libras (VLibras)<br>
-        A ferramenta VLibras realiza a tradução automática do conteúdo para Língua Brasileira de Sinais (Libras).<br><br>
-
-        5. Recomendações de uso<br>
-        Para melhor desempenho, recomenda-se utilizar o navegador Google Chrome e falar com clareza em um ambiente com baixo nível de ruído.
+        1. Clique em “Iniciar Microfone” e permita o acesso.<br>
+        2. Fale normalmente para transformar voz em texto em tempo real.<br>
+        3. As legendas aparecem na parte inferior da tela.<br>
+        4. O VLibras traduz automaticamente para Libras.<br>
+        5. Use preferencialmente o Google Chrome e fale com clareza.
         </p>
 
         <button id="closeHelp">Fechar</button>
@@ -383,3 +374,4 @@ recognition.onerror = (event) => {
 
 </body>
 </html>
+```
